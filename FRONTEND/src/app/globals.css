@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Tokens */
+  --brand-50: #F0FDFA;
+  --brand-100: #CCFBF1;
+  --brand-600: #0F766E;
+  --brand-700: #115E59;
+
+  /* Neutral / Ink Tokens */
+  --ink-900: #0F172A;
+  --ink-600: #475569;
+  --ink-400: #94A3B8;
+
+  /* Surface & Line Tokens */
+  --surface-0: #FFFFFF;
+  --surface-50: #F8FAFC;
+  --surface-100: #F1F5F9;
+  --line-200: #E2E8F0;
+
+  /* Risk & Semantic Tokens */
+  --risk-low: #16A34A;
+  --risk-low-bg: #F0FDF4;
+  --risk-med: #D97706;
+  --risk-med-bg: #FFFBEB;
+  --risk-high: #DC2626;
+  --risk-high-bg: #FEF2F2;
+
+  --emergency: #B91C1C;
+  --emergency-bg: #FEF2F2;
+
+  --demo: #7C3AED;
+  --demo-bg: #F5F3FF;
+
+  --info: #2563EB;
+  --info-bg: #EFF6FF;
+
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+  --font-devanagari: "Noto Sans Devanagari", sans-serif;
+  --font-kannada: "Noto Sans Kannada", sans-serif;
+}
+
+/* A low-glare theme built from the same tokens used by cards, forms and navigation. */
+.dark {
+  color-scheme: dark;
+  --brand-50: #142c2b;
+  --brand-100: #1b403e;
+  --brand-600: #2dd4bf;
+  --brand-700: #5eead4;
+
+  --ink-900: #f1f7f8;
+  --ink-600: #b2c2c7;
+  --ink-400: #7f949b;
+
+  --surface-0: #142127;
+  --surface-50: #0d181e;
+  --surface-100: #1b2b32;
+  --line-200: #31434a;
+
+  --risk-low: #4ade80;
+  --risk-low-bg: #153326;
+  --risk-med: #fbbf24;
+  --risk-med-bg: #392b12;
+  --risk-high: #f87171;
+  --risk-high-bg: #3b2024;
+
+  --emergency: #fca5a5;
+  --emergency-bg: #3b2024;
+  --demo: #c4b5fd;
+  --demo-bg: #2c2440;
+  --info: #93c5fd;
+  --info-bg: #1c2e43;
+}
+
+/* Accessibility: High Contrast Mode */
+.high-contrast {
+  --brand-50: #FFFFFF;
+  --brand-100: #D1FAE5;
+  --brand-600: #064E3B;
+  --brand-700: #022C22;
+  --ink-900: #000000;
+  --ink-600: #1F2937;
+  --ink-400: #4B5563;
+  --surface-0: #FFFFFF;
+  --surface-50: #F3F4F6;
+  --surface-100: #E5E7EB;
+  --line-200: #111827;
+  --risk-low: #047857;
+  --risk-low-bg: #ECFDF5;
+  --risk-med: #B45309;
+  --risk-med-bg: #FEF3C7;
+  --risk-high: #991B1B;
+  --risk-high-bg: #FEE2E2;
+  --emergency: #7F1D1D;
+  --emergency-bg: #FEE2E2;
+  --demo: #5B21B6;
+  --demo-bg: #EDE9FE;
+  --info: #1E40AF;
+  --info-bg: #DBEAFE;
+}
+
+.dark.high-contrast {
+  --brand-50: #102321;
+  --brand-100: #17413d;
+  --brand-600: #5eead4;
+  --brand-700: #99f6e4;
+  --ink-900: #ffffff;
+  --ink-600: #e2e8f0;
+  --ink-400: #cbd5e1;
+  --surface-0: #071114;
+  --surface-50: #00090c;
+  --surface-100: #102027;
+  --line-200: #91a4aa;
+}
+
+/* Accessibility: Large Text Mode */
+.large-text {
+  font-size: 1.15rem;
+}
+
+.large-text h1 {
+  font-size: 2.25rem !important;
+  line-height: 2.75rem !important;
+}
+
+.large-text h2 {
+  font-size: 1.75rem !important;
+  line-height: 2.25rem !important;
+}
+
+.large-text h3 {
+  font-size: 1.4rem !important;
+  line-height: 1.85rem !important;
+}
+
+.large-text button,
+.large-text a,
+.large-text input,
+.large-text select,
+.large-text textarea {
+  font-size: 1.15rem !important;
+}
+
+/* Visible keyboard focus indicators */
+*:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+}
+
+/* Global body resets */
+body {
+  color: var(--ink-900);
+  background-color: var(--surface-50);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+body,
+header,
+main,
+footer,
+button,
+a,
+input,
+select,
+textarea {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: 160ms;
+}
+
+/* Adapt the few legacy slate/gray utilities used by feature screens. */
+.dark .bg-white { background-color: var(--surface-0) !important; }
+.dark .bg-gray-50,
+.dark .bg-slate-50 { background-color: var(--surface-50) !important; }
+.dark .bg-gray-100,
+.dark .bg-slate-100 { background-color: var(--surface-100) !important; }
+.dark .bg-teal-50 { background-color: #15302e !important; }
+.dark .bg-emerald-50 { background-color: #153326 !important; }
+.dark .bg-amber-50 { background-color: #392b12 !important; }
+.dark .bg-red-50 { background-color: #3b2024 !important; }
+.dark .bg-blue-50 { background-color: #1c2e43 !important; }
+
+.dark .text-gray-900,
+.dark .text-slate-900,
+.dark .text-gray-800,
+.dark .text-slate-800 { color: var(--ink-900) !important; }
+.dark .text-gray-700,
+.dark .text-slate-700,
+.dark .text-gray-600,
+.dark .text-slate-600,
+.dark .text-gray-500,
+.dark .text-slate-500 { color: var(--ink-600) !important; }
+.dark .text-gray-400,
+.dark .text-slate-400 { color: var(--ink-400) !important; }
+.dark .border-gray-100,
+.dark .border-slate-100,
+.dark .border-gray-200,
+.dark .border-slate-200,
+.dark .border-slate-300 { border-color: var(--line-200) !important; }
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--line-200) !important; }
+
+.dark .text-emerald-800,
+.dark .text-green-800 { color: #86efac !important; }
+.dark .text-emerald-700,
+.dark .text-green-700 { color: #4ade80 !important; }
+.dark .text-teal-800,
+.dark .text-teal-700 { color: #5eead4 !important; }
+.dark .text-amber-800,
+.dark .text-orange-800 { color: #fcd34d !important; }
+.dark .text-amber-700,
+.dark .text-orange-700 { color: #fbbf24 !important; }
+.dark .text-red-700,
+.dark .text-rose-700 { color: #f87171 !important; }
+.dark .text-red-800,
+.dark .text-red-900,
+.dark .text-rose-800 { color: #fca5a5 !important; }
+.dark .text-blue-800 { color: #93c5fd !important; }
+.dark input::placeholder,
+.dark textarea::placeholder { color: var(--ink-400); }

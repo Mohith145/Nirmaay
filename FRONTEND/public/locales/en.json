@@ -1,0 +1,73 @@
+{
+  "app": {
+    "name": "Nirmay",
+    "tagline": "AI-Assisted Oral Cancer Screening & Triage Platform",
+    "disclaimer": "Screening aid, not diagnosis. Always consult a qualified medical professional for definitive diagnosis.",
+    "emergency_call": "Emergency Helpline: 112 / 108"
+  },
+  "nav": {
+    "home": "Home",
+    "myths": "Awareness & Myths",
+    "selfExam": "Self-Exam Guide",
+    "modelCard": "Model Card & Transparency",
+    "emergency": "Emergency Help",
+    "roadmap": "Roadmap",
+    "login": "Sign In",
+    "register": "Register",
+    "logout": "Log Out",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "intake": "Health Intake",
+    "symptoms": "Symptom Check",
+    "photo": "Oral Photo Screen",
+    "results": "Screening Results",
+    "cases": "My Cases",
+    "quitTobacco": "Quit Tobacco",
+    "campMode": "Camp Mode",
+    "queue": "Clinician Queue",
+    "insights": "Analytics & Hotspots",
+    "staffManagement": "Staff Management",
+    "admin": "Admin Dashboard"
+  },
+  "common": {
+    "save": "Save",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try Again",
+    "close": "Close",
+    "status": "Status",
+    "actions": "Actions",
+    "view": "View",
+    "confirm": "Confirm",
+    "override": "Override",
+    "yes": "Yes",
+    "no": "No",
+    "demoPlaceholder": "Demo Placeholder",
+    "demoData": "Demo Data",
+    "notSure": "Uncertain / Clinical Review Needed"
+  },
+  "roles": {
+    "patient": "Patient",
+    "health_worker": "Health Worker",
+    "doctor": "Clinician",
+    "admin": "Administrator"
+  },
+  "risk": {
+    "low": "Low Risk",
+    "medium": "Medium Risk",
+    "high": "High Risk",
+    "urgent": "Urgent",
+    "soon": "Soon",
+    "routine": "Routine",
+    "emergency": "Emergency Escalation"
+  },
+  "accessibility": {
+    "largeText": "Large Text",
+    "highContrast": "High Contrast",
+    "language": "Language"
+  }
+}
