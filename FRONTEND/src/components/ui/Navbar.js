@@ -40,10 +40,10 @@ export function Navbar({ onToggleSidebar = null }) {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-base sm:text-lg text-ink-900 tracking-tight leading-none">
-                Nirmay
+                {t("app.name", "Nirmay")}
               </span>
               <span className="text-[10px] text-ink-600 font-medium tracking-wide">
-                Oral Cancer Triage
+                {t("Oral Cancer Triage")}
               </span>
             </div>
           </Link>

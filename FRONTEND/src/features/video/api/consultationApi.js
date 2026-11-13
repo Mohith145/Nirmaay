@@ -3,7 +3,7 @@
  * - GET /appointments/{id}
  * - POST /appointments
  */
-import { getAppointment, createAppointment } from "@/lib/api/appointments";
+import { endAppointment, getAppointment, getAppointmentStatus, getAppointmentToken, startAppointment } from "@/lib/api/appointments";
 
 export const consultationApi = {
   get: async (id) => {
@@ -11,8 +11,7 @@ export const consultationApi = {
     return {
       id: String(raw.id),
       roomId: raw.room_id,
-      status: "live", // Backend creates room ready upon appointment creation
-      scheduledAt: new Date().toISOString(),
+      status: raw.status,
       joinUrl: raw.join_url,
       patientId: raw.patient_id,
       doctorId: raw.doctor_id,
@@ -20,18 +19,11 @@ export const consultationApi = {
     };
   },
 
-  start: async (id) => {
-    // Already live on server once created
-    const raw = await getAppointment(Number(id));
-    return {
-      status: "live",
-      roomId: raw.room_id,
-    };
-  },
+  status: (id) => getAppointmentStatus(Number(id)),
 
-  end: async (id) => {
-    return {
-      status: "ended",
-    };
-  },
+  start: (id) => startAppointment(Number(id)),
+
+  token: (id) => getAppointmentToken(Number(id)),
+
+  end: (id) => endAppointment(Number(id)),
 };

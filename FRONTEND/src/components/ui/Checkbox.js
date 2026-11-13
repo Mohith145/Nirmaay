@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 export function Checkbox({
   label,
   description,
+  helperText,
   id,
   checked = false,
   onChange,
@@ -14,6 +15,7 @@ export function Checkbox({
   ...props
 }) {
   const checkboxId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+  const help = description || helperText;
 
   return (
     <label
@@ -43,10 +45,10 @@ export function Checkbox({
           {checked && <Check className="w-3.5 h-3.5 text-surface-0 stroke-[3]" />}
         </div>
       </div>
-      {(label || description) && (
+      {(label || help) && (
         <div className="flex flex-col">
           {label && <span className="text-sm font-medium text-ink-900 leading-tight">{label}</span>}
-          {description && <span className="text-xs text-ink-600 mt-0.5">{description}</span>}
+          {help && <span className="text-xs text-ink-600 mt-0.5">{help}</span>}
         </div>
       )}
     </label>

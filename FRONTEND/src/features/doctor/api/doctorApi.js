@@ -163,12 +163,17 @@ export const doctorApi = {
 
   createAppointment: async (payload) => {
     // Backend appointment is initiated per case_id: POST /appointments with { case_id }
-    const caseId = payload.caseId || payload.patientId;
-    const res = await createAppointment({ case_id: Number(caseId) });
+    const caseId = payload.patientId || payload.caseId;
+    const res = await createAppointment({
+      case_id: Number(caseId),
+      scheduled_at: payload.scheduledAt,
+      duration_minutes: Number(payload.durationMinutes) || 20,
+    });
     return {
       consultationId: String(res.id),
       roomId: res.room_id,
-      scheduledAt: new Date().toISOString(),
+      scheduledAt: res.scheduled_at || payload.scheduledAt,
+      durationMinutes: res.duration_minutes,
       joinUrl: res.join_url,
     };
   },

@@ -8,6 +8,7 @@ export * as photosApi from "./photos";
 export * as casesApi from "./cases";
 export * as clinicianApi from "./clinician";
 export * as appointmentsApi from "./appointments";
+export * as patientsApi from "./patients";
 export * as demoApi from "./demo";
 export * as quitApi from "./quit";
 export * as explainApi from "./explain";

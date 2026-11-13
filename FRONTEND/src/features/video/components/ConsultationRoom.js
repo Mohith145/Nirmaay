@@ -25,9 +25,16 @@ function useConsultation(id, active) {
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     if (!active) return undefined;
-    const timer = setInterval(load, POLL_MS);
+    const timer = setInterval(async () => {
+      try {
+        const { status } = await consultationApi.status(id);
+        setState((s) => s.data ? ({ ...s, data: { ...s.data, status }, error: null }) : s);
+      } catch (error) {
+        setState((s) => ({ ...s, error }));
+      }
+    }, POLL_MS);
     return () => clearInterval(timer);
-  }, [active, load]);
+  }, [active, id]);
   return { ...state, reload: load, setData: (data) => setState((s) => ({ ...s, data })) };
 }
 
@@ -103,9 +110,8 @@ export default function ConsultationRoom({ consultationId }) {
 
   const apiRef = useRef(null);
   const [inCall, setInCall] = useState(false);
-  const [left, setLeft] = useState(false);
+  const [callSession, setCallSession] = useState(null);
   const [ended, setEnded] = useState(false);
-  const [stageKey, setStageKey] = useState(0);
   const [conn, setConn] = useState("joining");
   const [participants, setParticipants] = useState(null);
   const [audioMuted, setAudioMuted] = useState(false);
@@ -115,17 +121,17 @@ export default function ConsultationRoom({ consultationId }) {
   const [actionError, setActionError] = useState("");
   const [stageError, setStageError] = useState("");
 
-  const poll = Boolean(user) && !inCall && !ended;
+  const poll = Boolean(user) && !ended;
   const { data: c, error, loading, reload, setData } = useConsultation(consultationId, poll);
-
-  // Patient: enter automatically once the doctor has started AND devices were already confirmed.
-  useEffect(() => {
-    if (isPatient && c?.status === "live" && devices === "granted" && !inCall && !ended && !left) setInCall(true);
-  }, [isPatient, c?.status, devices, inCall, ended, left]);
 
   // If the doctor ends the call while a patient is waiting/in it, reflect that.
   useEffect(() => {
-    if (c?.status === "ended") { setEnded(true); setInCall(false); }
+    if (c?.status === "ended") {
+      apiRef.current?.executeCommand("hangup");
+      setCallSession(null);
+      setEnded(true);
+      setInCall(false);
+    }
   }, [c?.status]);
 
   if (authLoading) return <LoadingState />;
@@ -146,19 +152,33 @@ export default function ConsultationRoom({ consultationId }) {
   }
   if (!c) return null;
 
-  const roomName = c.roomId ? `nirmay-${c.roomId}` : null;
+  const roomName = c.roomId ? `${process.env.NEXT_PUBLIC_JAAS_APP_ID || ""}/${c.roomId}` : null;
   const displayName = isDoctor ? (/^dr\.?\s/i.test(user.name || "") ? user.name : `Dr. ${user.name || ""}`.trim()) : user.name || t("video.patient", "Patient");
   const counterpart = isDoctor ? c.patientName : c.doctorName;
 
   async function startAsDoctor() {
     if (!isDoctor) return; // defence in depth: patients never reach this
     setBusy(true); setActionError("");
+    setConn("joining"); setStageError("");
     try {
       const res = await consultationApi.start(consultationId);
-      setData({ ...c, ...res });
+      setCallSession(res);
+      setData({ ...c, status: "live" });
       setInCall(true);
     } catch (e) {
       setActionError(errorMessage(e, t("video.startFailed", "The consultation could not be started.")));
+    } finally { setBusy(false); }
+  }
+
+  async function joinAsParticipant() {
+    setBusy(true); setActionError("");
+    setConn("joining"); setStageError("");
+    try {
+      const res = await consultationApi.token(consultationId);
+      setCallSession(res);
+      setInCall(true);
+    } catch (e) {
+      setActionError(errorMessage(e, t("video.joinFailed", "The consultation could not be joined.")));
     } finally { setBusy(false); }
   }
 
@@ -168,6 +188,7 @@ export default function ConsultationRoom({ consultationId }) {
       await consultationApi.end(consultationId);
       apiRef.current?.executeCommand("hangup");
       setEnded(true); setInCall(false);
+      setCallSession(null);
       setData({ ...c, status: "ended" });
     } catch (e) {
       setActionError(errorMessage(e, t("video.endFailed", "The consultation could not be ended. You are still connected.")));
@@ -176,14 +197,14 @@ export default function ConsultationRoom({ consultationId }) {
 
   function leaveAsPatient() {
     apiRef.current?.executeCommand("hangup");
-    setLeft(true);
+    setCallSession(null);
     setInCall(false);
     setConn("joining");
   }
 
   const handlers = {
     onJoined: () => { setConn("connected"); setStageError(""); },
-    onLeft: () => { if (isPatient) leaveAsPatient(); else { setInCall(false); setConn("joining"); } },
+    onLeft: () => { if (isPatient) leaveAsPatient(); else { setCallSession(null); setInCall(false); setConn("joining"); } },
     onAudioMute: (e) => setAudioMuted(Boolean(e?.muted)),
     onVideoMute: (e) => setVideoMuted(Boolean(e?.muted)),
     onParticipants: setParticipants,
@@ -227,13 +248,13 @@ export default function ConsultationRoom({ consultationId }) {
         {header}
         {IS_PUBLIC_JITSI && <DemoBanner message={t("video.demoBanner", "Demonstration video service (public Jitsi). Do not use it for real patient consultations - production requires a secured, privately hosted video service. Calls are not recorded.")} />}
         <div className="space-y-3">
-          <div className="h-[60vh] min-h-[320px] overflow-hidden rounded-xl border border-slate-200">
-            <JitsiStage key={stageKey} roomName={roomName} displayName={displayName} subject={t("video.title", "Video consultation")} apiRef={apiRef} handlers={handlers} />
+          <div className="mx-auto aspect-video min-h-[360px] max-h-[72vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-lg">
+            <JitsiStage roomName={callSession?.room_name || roomName} token={callSession?.token} displayName={displayName} subject={t("video.title", "Video consultation")} apiRef={apiRef} handlers={handlers} />
           </div>
           {(conn === "error" || stageError) && (
             <div role="alert" className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 sm:flex-row sm:items-center sm:justify-between">
               <span>{stageError || t("video.connectionProblem", "Connection problem")}</span>
-              <button type="button" onClick={() => { setConn("joining"); setStageError(""); setStageKey((k) => k + 1); }} className={btnSecondary}>
+              <button type="button" onClick={joinAsParticipant} disabled={busy} className={btnSecondary}>
                 <RefreshCw className="h-4 w-4" aria-hidden="true" />{t("video.reconnect", "Reconnect")}
               </button>
             </div>
@@ -262,7 +283,7 @@ export default function ConsultationRoom({ consultationId }) {
           {isDoctor && (
             <div className="flex flex-wrap items-center gap-3">
               {c.status === "live" ? (
-                <button type="button" onClick={() => setInCall(true)} className={btnPrimary}>
+                <button type="button" onClick={joinAsParticipant} disabled={busy} className={btnPrimary}>
                   <Video className="h-4 w-4" aria-hidden="true" />{t("video.reenter", "Re-enter consultation")}
                 </button>
               ) : (
@@ -278,7 +299,7 @@ export default function ConsultationRoom({ consultationId }) {
           {isPatient && (
             c.status === "live" ? (
               <div className="flex flex-wrap items-center gap-3">
-                <button type="button" onClick={() => { setLeft(false); setInCall(true); }} className={btnPrimary}>
+                <button type="button" onClick={joinAsParticipant} disabled={busy} className={btnPrimary}>
                   <Video className="h-4 w-4" aria-hidden="true" />{t("video.join", "Join consultation")}
                 </button>
                 <p role="status" className="text-sm text-emerald-800">{t("video.doctorReady", "Your doctor has started the consultation.")}</p>

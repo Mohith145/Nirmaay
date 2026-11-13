@@ -1,10 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./src/pages/**/*.{js,mdx}",
-    "./src/components/**/*.{js,mdx}",
-    "./src/app/**/*.{js,mdx}",
-    "./src/lib/**/*.{js,mdx}",
+    "./src/**/*.{js,jsx,mdx,ts,tsx}",
   ],
   theme: {
     extend: {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   QrCode,
@@ -19,8 +19,6 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { DemoBadge } from "@/components/ui/DemoBadge";
 import { DisclaimerBanner } from "@/components/ui/DisclaimerBanner";
-import { Spinner } from "@/components/ui/Spinner";
-import { getQrCard } from "@/lib/api/demo";
 import { useToast } from "@/context/ToastContext";
 
 function CampModeContent() {
@@ -30,30 +28,15 @@ function CampModeContent() {
 
   const [patientIdInput, setPatientIdInput] = useState(initialPatientId);
   const [activePatientId, setActivePatientId] = useState(initialPatientId);
-  const [qrData, setQrData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadQr() {
-      setIsLoading(true);
-      try {
-        const data = await getQrCard(activePatientId);
-        setQrData(data);
-      } catch {
-        // Fallback demo payload
-        setQrData({
-          patient_id: activePatientId,
-          qr_payload: `nirmay://demo/card/${activePatientId}`,
-          card_title: "Nirmay screening card (demo placeholder)",
-          data_label: "demo data",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadQr();
-  }, [activePatientId]);
+  // The backend demo QR endpoint is restricted to clinicians/admins. This
+  // screen displays a labelled placeholder card, so compose its demo payload
+  // locally instead of issuing an unauthorized request and swallowing 403.
+  const qrData = {
+    patient_id: activePatientId,
+    qr_payload: `nirmay://demo/card/${activePatientId}`,
+    card_title: "Nirmay screening card (demo placeholder)",
+    data_label: "demo data",
+  };
 
   const handleLookup = (e) => {
     e.preventDefault();
@@ -103,12 +86,7 @@ function CampModeContent() {
       </Card>
 
       {/* QR Health Card Display */}
-      {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <Spinner size="lg" />
-          <span className="text-xs text-ink-600">Generating digital QR token...</span>
-        </div>
-      ) : (
+      {
         <div className="max-w-md mx-auto w-full">
           <Card variant="elevated" className="border-2 border-brand-600/40 p-6 flex flex-col items-center text-center gap-5 shadow-lg">
             <div className="w-full flex items-center justify-between border-b border-line-200 pb-3">
@@ -155,7 +133,7 @@ function CampModeContent() {
             </div>
           </Card>
         </div>
-      )}
+      }
     </div>
   );
 }

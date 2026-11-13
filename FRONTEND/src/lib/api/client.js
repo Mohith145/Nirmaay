@@ -1,4 +1,5 @@
 import { ApiError, normalizeError } from "./errors";
+import { firebaseAuth } from "../firebase";
 
 const DEFAULT_TIMEOUT_MS = 30000;
 const PHOTO_TIMEOUT_MS = 60000;
@@ -30,7 +31,9 @@ export async function apiFetch(endpoint, options = {}) {
   // Resolve authorization token
   let authToken = token;
   if (!authToken && typeof window !== "undefined") {
-    authToken = localStorage.getItem("nirmay_token");
+    authToken = firebaseAuth.currentUser
+      ? await firebaseAuth.currentUser.getIdToken()
+      : localStorage.getItem("nirmay_token");
   }
 
   const finalHeaders = { ...headers };
@@ -68,6 +71,7 @@ export async function apiFetch(endpoint, options = {}) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("nirmay_token");
         localStorage.removeItem("nirmay_user");
+        if (firebaseAuth.currentUser) await firebaseAuth.signOut();
         if (!window.location.pathname.startsWith("/login")) {
           const currentPath = window.location.pathname;
           window.location.href = `/login?next=${encodeURIComponent(currentPath)}`;

@@ -23,6 +23,17 @@ export async function createCase({ intake_id, symptom_id = null, photo_id = null
 }
 
 /**
+ * List screening cases.
+ * @param {number|null} patientId - optional patient filter for health workers/doctors
+ */
+export async function listCases(patientId = null) {
+  const query = patientId ? `?patient_id=${Number(patientId)}` : "";
+  return apiFetch(`/cases${query}`, {
+    method: "GET",
+  });
+}
+
+/**
  * Retrieve patient handoff summary for a case.
  */
 export async function getCaseHandoff(caseId) {

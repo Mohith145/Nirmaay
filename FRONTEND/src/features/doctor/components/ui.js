@@ -8,8 +8,8 @@ export const cx = (...a) => a.filter(Boolean).join(" ");
 const focus =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700";
 export const btnPrimary = cx(
-  "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 text-sm font-semibold text-white",
-  "transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50",
+  "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white shadow-sm",
+  "transition-colors hover:bg-brand-700 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50",
   focus
 );
 export const btnSecondary = cx(

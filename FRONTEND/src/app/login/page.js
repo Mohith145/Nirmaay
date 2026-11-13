@@ -14,6 +14,7 @@ import { DemoBadge } from "@/components/ui/DemoBadge";
 import { ROUTES } from "@/config/routes";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { useI18n } from "@/context/I18nContext";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -26,6 +27,7 @@ function LoginForm() {
 
   const { login } = useAuth();
   const { addToast } = useToast();
+  const { t } = useI18n();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,9 +60,9 @@ function LoginForm() {
         <div className="w-12 h-12 rounded-2xl bg-brand-600 text-surface-0 flex items-center justify-center shadow-md">
           <Activity className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900">Sign in to Nirmay</h1>
+        <h1 className="text-2xl font-bold text-ink-900">{t("auth.signin_title", "Sign in to Nirmay")}</h1>
         <p className="text-xs sm:text-sm text-ink-600">
-          Access your clinical workspace, patient portal, or camp mode.
+          {t("auth.signin_subtitle", "Access your clinical workspace, patient portal, or camp mode.")}
         </p>
       </div>
 
@@ -75,7 +77,7 @@ function LoginForm() {
             )}
 
             <Input
-              label="Email Address"
+              label={t("auth.email", "Email Address")}
               type="email"
               id="email"
               required
@@ -86,7 +88,7 @@ function LoginForm() {
             />
 
             <Input
-              label="Password"
+              label={t("auth.password", "Password")}
               type="password"
               id="password"
               required
@@ -105,14 +107,14 @@ function LoginForm() {
               icon={<ArrowRight className="w-4 h-4" />}
               iconPosition="right"
             >
-              Sign In
+              {t("nav.login", "Sign In")}
             </Button>
           </Form>
 
           <div className="mt-6 pt-5 border-t border-line-200 text-center text-xs text-ink-600">
-            <span>Don&apos;t have an account? </span>
+            <span>{t("auth.no_account", "Don't have an account?")} </span>
             <Link href={ROUTES.REGISTER} className="text-brand-600 font-semibold hover:underline">
-              Register as Patient
+              {t("auth.register_patient_link", "Register as Patient")}
             </Link>
           </div>
         </Card.Content>
@@ -123,12 +125,12 @@ function LoginForm() {
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-ink-900 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-demo" />
-            Quick Demo Logins
+            {t("auth.quick_demo", "Quick Demo Logins")}
           </span>
-          <DemoBadge label="auto fill" size="sm" />
+          <DemoBadge label={t("auth.auto_fill", "auto fill")} size="sm" />
         </div>
         <p className="text-[11px] text-ink-600 leading-tight">
-          Select any seeded role below to populate credentials (Password: <code>demo-password</code>):
+          {t("auth.quick_demo_desc", "Select any seeded role below to populate credentials (Password: demo-password):")}
         </p>
 
         <div className="grid grid-cols-2 gap-2">
@@ -138,7 +140,7 @@ function LoginForm() {
             onClick={() => handleQuickFill("patient@demo.nirmay.test")}
             className="text-xs justify-start px-2.5"
           >
-            👤 Patient
+            👤 {t("roles.patient", "Patient")}
           </Button>
           <Button
             variant="secondary"
@@ -146,7 +148,7 @@ function LoginForm() {
             onClick={() => handleQuickFill("doctor@demo.nirmay.test")}
             className="text-xs justify-start px-2.5"
           >
-            🩺 Doctor
+            🩺 {t("roles.doctor", "Doctor")}
           </Button>
           <Button
             variant="secondary"
@@ -154,7 +156,7 @@ function LoginForm() {
             onClick={() => handleQuickFill("healthworker@demo.nirmay.test")}
             className="text-xs justify-start px-2.5"
           >
-            📋 Health Worker
+            📋 {t("roles.health_worker", "Health Worker")}
           </Button>
           <Button
             variant="secondary"
@@ -162,7 +164,7 @@ function LoginForm() {
             onClick={() => handleQuickFill("admin@demo.nirmay.test")}
             className="text-xs justify-start px-2.5"
           >
-            🛡️ Admin
+            🛡️ {t("roles.admin", "Admin")}
           </Button>
         </div>
       </div>

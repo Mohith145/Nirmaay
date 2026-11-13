@@ -13,17 +13,13 @@ export const PUBLIC_NAV = [
 export const ROLE_NAVIGATION = {
   [ROLES.PATIENT]: [
     { labelKey: "nav.dashboard", fallback: "Overview", href: ROUTES.PATIENT_HOME, icon: "LayoutDashboard" },
-    { labelKey: "nav.intake", fallback: "Health Intake", href: ROUTES.PATIENT_INTAKE, icon: "ClipboardList" },
-    { labelKey: "nav.symptoms", fallback: "Symptom Check", href: ROUTES.PATIENT_SYMPTOMS, icon: "Activity" },
-    { labelKey: "nav.photo", fallback: "Photo Screener", href: ROUTES.PATIENT_PHOTO, icon: "Camera" },
-    { labelKey: "nav.results", fallback: "Screening Results", href: ROUTES.PATIENT_RESULTS, icon: "FileText" },
-    { labelKey: "nav.cases", fallback: "My Cases", href: ROUTES.PATIENT_CASES, icon: "FolderOpen" },
+    { labelKey: "nav.cases", fallback: "My Screening Results", href: ROUTES.PATIENT_CASES, icon: "FolderOpen" },
     { labelKey: "nav.quitTobacco", fallback: "Quit Tobacco", href: ROUTES.PATIENT_QUIT, icon: "Heart" },
   ],
   [ROLES.HEALTH_WORKER]: [
     { labelKey: "nav.dashboard", fallback: "Camp Overview", href: ROUTES.HEALTH_WORKER_HOME, icon: "LayoutDashboard" },
-    { labelKey: "nav.campMode", fallback: "Camp Screening", href: ROUTES.HEALTH_WORKER_CAMP, icon: "Users" },
-    { labelKey: "nav.intake", fallback: "Assisted Intake", href: ROUTES.HEALTH_WORKER_INTAKE, icon: "UserPlus" },
+    { labelKey: "nav.intake", fallback: "Register & Screen Patient", href: ROUTES.HEALTH_WORKER_INTAKE, icon: "UserPlus" },
+    { labelKey: "nav.campMode", fallback: "Camp QR Health Cards", href: ROUTES.HEALTH_WORKER_CAMP, icon: "QrCode" },
   ],
   [ROLES.DOCTOR]: [
     { labelKey: "nav.queue", fallback: "Case Queue", href: ROUTES.DOCTOR_HOME, icon: "ClipboardCheck" },

@@ -1,17 +1,18 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-export const JITSI_DOMAIN = process.env.NEXT_PUBLIC_JITSI_DOMAIN || "meet.jit.si";
-export const IS_PUBLIC_JITSI = JITSI_DOMAIN === "meet.jit.si";
+export const JITSI_DOMAIN = "8x8.vc";
+export const JAAS_APP_ID = process.env.NEXT_PUBLIC_JAAS_APP_ID || "";
+export const IS_PUBLIC_JITSI = false;
 
 let scriptPromise = null;
-function loadJitsiScript() {
+function loadJitsiScript(appId) {
   if (typeof window === "undefined") return Promise.reject(new Error("no window"));
   if (window.JitsiMeetExternalAPI) return Promise.resolve();
   if (!scriptPromise) {
     scriptPromise = new Promise((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = `https://${JITSI_DOMAIN}/external_api.js`;
+      s.src = `https://${JITSI_DOMAIN}/${appId}/external_api.js`;
       s.async = true;
       s.onload = () => resolve();
       s.onerror = () => {
@@ -29,7 +30,7 @@ function loadJitsiScript() {
  * streaming and invite features are disabled. Imperative controls are exposed
  * through `apiRef` (executeCommand("toggleAudio" | "toggleVideo" | "hangup")).
  */
-export default function JitsiStage({ roomName, displayName, subject, apiRef, handlers }) {
+export default function JitsiStage({ roomName, displayName, subject, token, apiRef, handlers }) {
   const parentRef = useRef(null);
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
@@ -38,11 +39,13 @@ export default function JitsiStage({ roomName, displayName, subject, apiRef, han
     let disposed = false;
     let api = null;
 
-    loadJitsiScript()
+    const appId = roomName?.split("/")[0] || JAAS_APP_ID;
+    loadJitsiScript(appId)
       .then(() => {
         if (disposed || !parentRef.current) return;
         api = new window.JitsiMeetExternalAPI(JITSI_DOMAIN, {
           roomName,
+          jwt: token,
           parentNode: parentRef.current,
           width: "100%",
           height: "100%",
@@ -84,7 +87,7 @@ export default function JitsiStage({ roomName, displayName, subject, apiRef, han
       if (apiRef) apiRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomName, displayName]);
+  }, [roomName, displayName, token]);
 
   return <div ref={parentRef} className="h-full w-full bg-slate-900" />;
 }

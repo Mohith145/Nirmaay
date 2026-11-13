@@ -7,7 +7,7 @@ import { doctorApi } from "../api/doctorApi";
 import { errorMessage, useAsync } from "../hooks/useAsync";
 import DecisionForm from "./DecisionForm";
 import RoleGate from "./RoleGate";
-import { AiDisclaimer, btnSecondary, Card, ErrorState, fmtDateTime, LoadingState, PageHeader, PriorityBadge, StatusBadge } from "./ui";
+import { AiDisclaimer, btnPrimary, btnSecondary, Card, ErrorState, fmtDateTime, LoadingState, PageHeader, PriorityBadge, StatusBadge } from "./ui";
 
 function Field({ label, children }) {
   if (children === undefined || children === null || children === "") return null;
@@ -58,7 +58,7 @@ function Body({ caseId }) {
           <>
             <PriorityBadge priority={c.priority} />
             <StatusBadge status={liveStatus || c.status} />
-            <Link href={`/doctor/appointments/new?caseId=${encodeURIComponent(c.id)}${p.id ? `&patientId=${encodeURIComponent(p.id)}` : ""}`} className={btnSecondary}>
+            <Link href={`/doctor/appointments/new?caseId=${encodeURIComponent(c.id)}${p.id ? `&patientId=${encodeURIComponent(p.id)}` : ""}`} className={`${btnPrimary} shadow-sm`}>
               <CalendarPlus className="h-4 w-4" aria-hidden="true" />
               {t("doctor.newAppointment", "Schedule consultation")}
             </Link>

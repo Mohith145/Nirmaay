@@ -2,10 +2,33 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { login as apiLogin, register as apiRegister, deleteAccount as apiDeleteAccount } from "../lib/api/auth";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
+import { firebaseAuth } from "../lib/firebase";
+import { apiFetch } from "../lib/api/client";
+import { register as apiRegister, deleteAccount as apiDeleteAccount } from "../lib/api/auth";
 import { ROLE_HOME_ROUTES } from "../config/roles";
 
 const AuthContext = createContext(null);
+
+function persistSession(idToken, user) {
+  localStorage.setItem("nirmay_token", idToken);
+  localStorage.setItem("nirmay_user", JSON.stringify(user));
+}
+
+function clearSession() {
+  localStorage.removeItem("nirmay_token");
+  localStorage.removeItem("nirmay_user");
+}
+
+async function backendUser(idToken) {
+  return apiFetch("/me", { token: idToken });
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -13,97 +36,126 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Load persistent token and user on mount
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem("nirmay_token");
-      const storedUser = localStorage.getItem("nirmay_user");
-
-      if (storedToken && storedUser) {
-        // Quick check for JWT expiration
-        try {
-          const payloadPart = storedToken.split(".")[1];
-          if (payloadPart) {
-            const payload = JSON.parse(atob(payloadPart));
-            if (payload.exp && Date.now() >= payload.exp * 1000) {
-              // Expired
-              localStorage.removeItem("nirmay_token");
-              localStorage.removeItem("nirmay_user");
-              setToken(null);
-              setUser(null);
-              setIsLoading(false);
-              return;
+    let active = true;
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          const idToken = await firebaseUser.getIdToken();
+          const profile = await backendUser(idToken);
+          if (!active) return;
+          const userInfo = {
+            id: profile.id,
+            email: profile.email,
+            full_name: profile.full_name,
+            role: profile.role,
+          };
+          persistSession(idToken, userInfo);
+          setToken(idToken);
+          setUser(userInfo);
+        } else {
+          const storedToken = localStorage.getItem("nirmay_token");
+          const storedUser = localStorage.getItem("nirmay_user");
+          if (storedToken && storedUser) {
+            try {
+              const payloadPart = storedToken.split(".")[1];
+              const payload = payloadPart ? JSON.parse(atob(payloadPart)) : null;
+              if (payload?.exp && Date.now() >= payload.exp * 1000) {
+                clearSession();
+              } else {
+                setToken(storedToken);
+                setUser(JSON.parse(storedUser));
+              }
+            } catch {
+              clearSession();
             }
           }
-        } catch {
-          // If token parsing fails, ignore and proceed
         }
-
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+      } catch {
+        if (firebaseUser) {
+          clearSession();
+          await signOut(firebaseAuth);
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        if (active) setIsLoading(false);
       }
-    } catch {
-      // LocalStorage access issues
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
+
+  const login = useCallback(async ({ email, password, redirectTo = null }) => {
+    setIsLoading(true);
+    try {
+      const credential = await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+      const idToken = await credential.user.getIdToken(true);
+      const profile = await backendUser(idToken);
+      const userInfo = {
+        id: profile.id,
+        email: profile.email,
+        full_name: profile.full_name,
+        role: profile.role,
+      };
+      persistSession(idToken, userInfo);
+      setToken(idToken);
+      setUser(userInfo);
+      router.push(redirectTo || ROLE_HOME_ROUTES[profile.role] || "/");
+      return userInfo;
+    } catch (error) {
+      if (firebaseAuth.currentUser) await signOut(firebaseAuth);
+      clearSession();
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
-  const login = useCallback(
-    async ({ email, password, redirectTo = null }) => {
-      setIsLoading(true);
-      try {
-        const data = await apiLogin({ email, password });
-        // data has: { access_token, token_type, user_id, role }
-        const userInfo = {
-          id: data.user_id,
-          email,
-          role: data.role,
-        };
+  const registerPatient = useCallback(async ({ email, password, full_name, redirectTo = null }) => {
+    setIsLoading(true);
+    try {
+      const credential = await createUserWithEmailAndPassword(firebaseAuth, email.trim(), password);
+      await updateProfile(credential.user, { displayName: full_name.trim() });
+      const idToken = await credential.user.getIdToken(true);
+      const profile = await apiFetch("/auth/firebase/profile", {
+        method: "POST",
+        token: idToken,
+        body: { full_name: full_name.trim() },
+      });
+      const userInfo = {
+        id: profile.id,
+        email: profile.email,
+        full_name: profile.full_name,
+        role: profile.role,
+      };
+      persistSession(idToken, userInfo);
+      setToken(idToken);
+      setUser(userInfo);
+      router.push(redirectTo || ROLE_HOME_ROUTES[profile.role] || "/patient");
+      return userInfo;
+    } catch (error) {
+      if (firebaseAuth.currentUser) await signOut(firebaseAuth);
+      clearSession();
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router]);
 
-        setToken(data.access_token);
-        setUser(userInfo);
+  const registerStaff = useCallback(async ({ email, password, full_name, role }) => {
+    const currentToken = firebaseAuth.currentUser
+      ? await firebaseAuth.currentUser.getIdToken()
+      : token || localStorage.getItem("nirmay_token");
+    return apiRegister({ email, password, full_name, role }, currentToken);
+  }, [token]);
 
-        localStorage.setItem("nirmay_token", data.access_token);
-        localStorage.setItem("nirmay_user", JSON.stringify(userInfo));
-
-        const destination = redirectTo || ROLE_HOME_ROUTES[data.role] || "/";
-        router.push(destination);
-        return userInfo;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [router]
-  );
-
-  const registerPatient = useCallback(
-    async ({ email, password, full_name, redirectTo = null }) => {
-      setIsLoading(true);
-      try {
-        // Register patient
-        await apiRegister({ email, password, full_name, role: "patient" });
-        // Automatically log in after registration
-        return await login({ email, password, redirectTo: redirectTo || "/patient" });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [login]
-  );
-
-  const registerStaff = useCallback(
-    async ({ email, password, full_name, role }) => {
-      // Admin registering doctor, health_worker, or admin
-      const currentToken = token || localStorage.getItem("nirmay_token");
-      return await apiRegister({ email, password, full_name, role }, currentToken);
-    },
-    [token]
-  );
-
-  const logout = useCallback(() => {
-    localStorage.removeItem("nirmay_token");
-    localStorage.removeItem("nirmay_user");
+  const logout = useCallback(async () => {
+    await signOut(firebaseAuth);
+    clearSession();
     setToken(null);
     setUser(null);
     router.push("/login");
@@ -111,23 +163,21 @@ export function AuthProvider({ children }) {
 
   const deleteMyAccount = useCallback(async () => {
     await apiDeleteAccount();
-    logout();
+    await logout();
   }, [logout]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isLoading,
-        isAuthenticated: Boolean(token && user),
-        login,
-        registerPatient,
-        registerStaff,
-        logout,
-        deleteMyAccount,
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      token,
+      isLoading,
+      isAuthenticated: Boolean(token && user),
+      login,
+      registerPatient,
+      registerStaff,
+      logout,
+      deleteMyAccount,
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -135,8 +185,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 }

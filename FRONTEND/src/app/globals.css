@@ -4,38 +4,38 @@
 
 :root {
   /* Brand Tokens */
-  --brand-50: #F0FDFA;
-  --brand-100: #CCFBF1;
-  --brand-600: #0F766E;
-  --brand-700: #115E59;
+  --brand-50: #102a2b;
+  --brand-100: #173d3c;
+  --brand-600: #14b8a6;
+  --brand-700: #55ddca;
 
   /* Neutral / Ink Tokens */
-  --ink-900: #0F172A;
-  --ink-600: #475569;
-  --ink-400: #94A3B8;
+  --ink-900: #dfe2ee;
+  --ink-600: #b3bece;
+  --ink-400: #8793a5;
 
   /* Surface & Line Tokens */
-  --surface-0: #FFFFFF;
-  --surface-50: #F8FAFC;
-  --surface-100: #F1F5F9;
-  --line-200: #E2E8F0;
+  --surface-0: rgb(18 24 36 / 88%);
+  --surface-50: rgb(15 19 28 / 76%);
+  --surface-100: #202630;
+  --line-200: rgb(187 202 198 / 14%);
 
   /* Risk & Semantic Tokens */
-  --risk-low: #16A34A;
-  --risk-low-bg: #F0FDF4;
-  --risk-med: #D97706;
-  --risk-med-bg: #FFFBEB;
-  --risk-high: #DC2626;
-  --risk-high-bg: #FEF2F2;
+  --risk-low: #4ade80;
+  --risk-low-bg: rgb(22 163 74 / 16%);
+  --risk-med: #fbbf24;
+  --risk-med-bg: rgb(217 119 6 / 17%);
+  --risk-high: #fb7185;
+  --risk-high-bg: rgb(220 38 38 / 17%);
 
-  --emergency: #B91C1C;
-  --emergency-bg: #FEF2F2;
+  --emergency: #fb8b82;
+  --emergency-bg: rgb(185 28 28 / 18%);
 
-  --demo: #7C3AED;
-  --demo-bg: #F5F3FF;
+  --demo: #c4b5fd;
+  --demo-bg: rgb(124 58 237 / 16%);
 
-  --info: #2563EB;
-  --info-bg: #EFF6FF;
+  --info: #89ceff;
+  --info-bg: rgb(37 99 235 / 16%);
 
   --font-inter: "Inter", system-ui, -apple-system, sans-serif;
   --font-devanagari: "Noto Sans Devanagari", sans-serif;
@@ -44,6 +44,7 @@
 
 /* Accessibility: High Contrast Mode */
 .high-contrast {
+  color-scheme: light;
   --brand-50: #FFFFFF;
   --brand-100: #D1FAE5;
   --brand-600: #064E3B;
@@ -110,4 +111,125 @@ body {
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  color-scheme: dark;
+}
+
+html {
+  min-height: 100%;
+  background: #0f131c;
+}
+
+/* Soft midnight atmosphere with the template's warm horizon and teal glow. */
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 58% 28% at 50% 0%, rgb(54 76 93 / 34%), transparent 76%),
+    radial-gradient(ellipse 40% 24% at 76% 8%, rgb(245 158 11 / 10%), transparent 76%),
+    radial-gradient(ellipse 48% 38% at 0% 76%, rgb(20 184 166 / 7%), transparent 72%),
+    linear-gradient(180deg, #111721 0%, #0f131c 42%, #0b0f17 100%);
+}
+
+/* Keep the older hard-coded neutral utilities legible on the shared dark canvas. */
+.bg-white {
+  background-color: var(--surface-0);
+}
+
+.bg-slate-50,
+.bg-gray-50 {
+  background-color: var(--surface-50);
+}
+
+.bg-slate-100,
+.bg-gray-100 {
+  background-color: var(--surface-100);
+}
+
+.bg-slate-200 {
+  background-color: #343b47;
+}
+
+.hover\:bg-slate-50:hover,
+.hover\:bg-gray-50:hover {
+  background-color: var(--surface-100);
+}
+
+.hover\:bg-slate-100:hover,
+.hover\:bg-gray-100:hover {
+  background-color: #2a323e;
+}
+
+.hover\:bg-teal-50:hover,
+.hover\:bg-teal-50\/40:hover {
+  background-color: rgb(20 184 166 / 12%);
+}
+
+.text-slate-900,
+.text-slate-800,
+.text-slate-700 {
+  color: var(--ink-900);
+}
+
+.text-slate-600,
+.text-slate-500 {
+  color: var(--ink-600);
+}
+
+.text-slate-400,
+.text-slate-300 {
+  color: var(--ink-400);
+}
+
+.border-slate-100,
+.border-slate-200,
+.border-slate-300,
+.border-slate-400,
+.divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--line-200);
+}
+
+.border-red-200,
+.border-amber-200 {
+  border-color: rgb(245 158 11 / 30%);
+}
+
+.bg-red-50 {
+  background-color: rgb(127 29 29 / 22%);
+}
+
+.text-red-900,
+.text-red-800 {
+  color: #fecaca;
+}
+
+.bg-amber-50 {
+  background-color: rgb(146 64 14 / 22%);
+}
+
+.text-amber-900 {
+  color: #fde68a;
+}
+
+.text-emerald-800,
+.text-emerald-700 {
+  color: #86efac;
+}
+
+.bg-emerald-50,
+.bg-green-50 {
+  background-color: rgb(22 101 52 / 22%);
+}
+
+.text-green-900,
+.text-green-800 {
+  color: #bbf7d0;
+}
+
+.placeholder\:text-slate-400::placeholder {
+  color: var(--ink-400);
 }

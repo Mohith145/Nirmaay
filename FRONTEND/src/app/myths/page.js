@@ -7,9 +7,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { DisclaimerBanner } from "@/components/ui/DisclaimerBanner";
+import { useI18n } from "@/context/I18nContext";
 
 export default function MythsPage() {
   const [openIdx, setOpenIdx] = useState(0);
+  const { t } = useI18n();
 
   const mythsList = [
     {
@@ -48,9 +50,9 @@ export default function MythsPage() {
     <AppShell showSidebar={false}>
       <div className="flex flex-col gap-8 max-w-4xl mx-auto pb-12">
         <PageHeader
-          title="Oral Cancer Awareness & Common Myths"
-          description="Evidence-based facts to debunk prevalent misconceptions and encourage early consultation."
-          badge={<Badge variant="brand" icon={<BookOpen className="w-3.5 h-3.5" />}>Patient Education</Badge>}
+          title={t("myths.title", "Oral Cancer Awareness & Common Myths")}
+          description={t("myths.desc", "Evidence-based facts to debunk prevalent misconceptions and encourage early consultation.")}
+          badge={<Badge variant="brand" icon={<BookOpen className="w-3.5 h-3.5" />}>{t("Patient Education", "Patient Education")}</Badge>}
         />
 
         <DisclaimerBanner variant="subtle" />
@@ -76,19 +78,19 @@ export default function MythsPage() {
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-bold uppercase tracking-wider text-emergency">
-                          Myth #{idx + 1}
+                          {t("Myth #", "Myth #")}{idx + 1}
                         </span>
-                        {item.tags.map((t, i) => (
+                        {item.tags.map((tag, i) => (
                           <span
                             key={i}
                             className="text-[10px] px-2 py-0.5 rounded-full bg-surface-100 text-ink-600 font-medium"
                           >
-                            {t}
+                            {t(tag, tag)}
                           </span>
                         ))}
                       </div>
                       <h3 className="text-sm sm:text-base font-semibold text-ink-900 leading-snug">
-                        &ldquo;{item.myth}&rdquo;
+                        &ldquo;{t(item.myth, item.myth)}&rdquo;
                       </h3>
                     </div>
                   </div>
@@ -105,8 +107,8 @@ export default function MythsPage() {
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col gap-1 text-xs sm:text-sm text-ink-900 leading-relaxed">
-                        <strong className="text-risk-low font-bold">Medical Fact:</strong>
-                        <p>{item.fact}</p>
+                        <strong className="text-risk-low font-bold">{t("Medical Fact:", "Medical Fact:")}</strong>
+                        <p>{t(item.fact, item.fact)}</p>
                       </div>
                     </div>
                   </div>

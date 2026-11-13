@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // NIRMAY data is accessed through the API, where role and patient ownership
+    // are checked. Firebase client SDK access to clinical records is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

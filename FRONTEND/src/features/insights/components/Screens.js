@@ -141,17 +141,24 @@ export function QrScreen() {
       <InsightState state={state}>
         {(d) => (
           <div className="space-y-5">
+            {!d.analyticsAvailable && (
+              <p role="status" className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                QR engagement analytics are not available from the backend yet. Scan counts and breakdowns will appear here when tracking is connected.
+              </p>
+            )}
             <div className="grid grid-cols-3 gap-3">
-              <KpiTile label={t("insights.qr.scans", "QR scans")} value={d.totals.scans} />
-              <KpiTile label={t("insights.qr.unique", "Unique visitors")} value={d.totals.uniqueVisitors} />
-              <KpiTile label={t("insights.qr.started", "Started screening")} value={d.totals.startedScreening} />
+              <KpiTile label={t("insights.qr.scans", "QR scans")} value={d.totals?.scans ?? 0} />
+              <KpiTile label={t("insights.qr.unique", "Unique visitors")} value={d.totals?.uniqueVisitors ?? 0} />
+              <KpiTile label={t("insights.qr.started", "Started screening")} value={d.totals?.startedScreening ?? 0} />
             </div>
             <div className="grid gap-5 lg:grid-cols-2">
               <Card title={t("insights.qr.byDay", "Scans by day")}>
-                <LineChart points={d.byDay} yLabel={t("insights.qr.scans", "QR scans")} summary={`${t("insights.qr.byDay", "Scans by day")}: ${d.byDay.map((p) => `${p.label} ${p.value}`).join(", ")}`} />
+                {d.byDay?.length ? (
+                  <LineChart points={d.byDay} yLabel={t("insights.qr.scans", "QR scans")} summary={`${t("insights.qr.byDay", "Scans by day")}: ${d.byDay.map((p) => `${p.label} ${p.value}`).join(", ")}`} />
+                ) : <p className="text-sm text-slate-600">No scan activity has been recorded.</p>}
               </Card>
               <Card title={t("insights.qr.bySource", "Scans by source")}>
-                <BarList items={d.byLocation} />
+                {d.byLocation?.length ? <BarList items={d.byLocation} /> : <p className="text-sm text-slate-600">No scan sources have been recorded.</p>}
               </Card>
             </div>
           </div>

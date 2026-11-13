@@ -103,6 +103,13 @@ export const insightsApi = {
       patientId: raw?.patient_id || 1,
       qrPayload: raw?.qr_payload || "nirmay://demo/card/1",
       cardTitle: raw?.card_title || "Nirmay screening card (demo placeholder)",
+      // The current backend endpoint returns a QR card, not engagement
+      // analytics. Keep the UI contract complete without presenting invented
+      // sample figures as live data.
+      totals: { scans: 0, uniqueVisitors: 0, startedScreening: 0 },
+      byDay: [],
+      byLocation: [],
+      analyticsAvailable: false,
       dataLabel: raw?.data_label || "demo data",
     };
   },

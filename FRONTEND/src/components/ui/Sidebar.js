@@ -30,14 +30,14 @@ export function Sidebar({ role, isOpen = true, onClose = null, className = "" })
         <div className="p-3 rounded-xl bg-surface-50 border border-line-200 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[11px] uppercase tracking-wider font-semibold text-ink-600">
-              Workspace
+              {t("Workspace", "Workspace")}
             </span>
             <span className="text-sm font-bold text-ink-900">
-              {ROLE_LABELS[role] || role}
+              {ROLE_LABELS[role] ? t(ROLE_LABELS[role], ROLE_LABELS[role]) : role}
             </span>
           </div>
           <Badge variant="brand" size="sm">
-            Active
+            {t("Active", "Active")}
           </Badge>
         </div>
 

@@ -93,7 +93,7 @@ function Body() {
       <Card title={t("doctor.quickActions", "Quick actions")}>
         <div className="flex flex-wrap gap-2">
           <Link href="/doctor/queue" className={btnPrimary}><ClipboardList className="h-4 w-4" aria-hidden="true" />{t("doctor.openQueue", "Open clinical queue")}</Link>
-          <Link href="/doctor/appointments/new" className={btnSecondary}><CalendarPlus className="h-4 w-4" aria-hidden="true" />{t("doctor.newAppointment", "Schedule consultation")}</Link>
+          <Link href="/doctor/appointments/new" className={`${btnPrimary} shadow-sm`}><CalendarPlus className="h-4 w-4" aria-hidden="true" />{t("doctor.newAppointment", "Schedule consultation")}</Link>
           <Link href="/insights" className={btnSecondary}><BarChart3 className="h-4 w-4" aria-hidden="true" />{t("insights.title", "Insights")}</Link>
         </div>
       </Card>
