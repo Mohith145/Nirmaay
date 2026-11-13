@@ -1,0 +1,16 @@
+{
+  "model_version": "TBD",
+  "labels": ["normal", "suspicious", "urgent referral"],
+  "input_size": ["TBD_HEIGHT", "TBD_WIDTH"],
+  "layout": "TBD_NCHW_OR_NHWC",
+  "color_order": "TBD_RGB_OR_BGR",
+  "scale": "TBD_FROM_TRAINING_PIPELINE",
+  "mean": ["TBD_R", "TBD_G", "TBD_B"],
+  "std": ["TBD_R", "TBD_G", "TBD_B"],
+  "output_type": "TBD_LOGITS_OR_PROBABILITIES",
+  "temperature": "TBD_MEASURED_ON_VALIDATION_SET",
+  "confidence_threshold": "TBD_MEASURED_ON_VALIDATION_SET",
+  "not_mouth_label": null,
+  "input_name": null,
+  "output_name": null
+}

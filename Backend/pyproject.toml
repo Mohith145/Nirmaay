@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# B008: FastAPI's Depends() in function defaults is intentional (standard pattern).
+# E501: Long lines acceptable in test assertions and long string literals.
+# PLC0415: Lazy imports inside functions are intentional (circular-import avoidance, optional modules).
+ignore = ["B008", "E501", "PLC0415"]
+select = ["E", "F", "W", "I", "B", "C4", "UP", "RUF", "PLC"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,86 @@
+# Nirmay oral-cancer screening rules.
+# STATUS: PENDING CLINICIAN REVIEW. Every number below is a DEMO PLACEHOLDER chosen only so the
+# engine runs. None is a clinical cut-off. A qualified clinician must replace/sign off each one.
+# Reviewer: TBD   Review date: TBD
+# Thresholds live ONLY in this file. engine.py must never hardcode a number.
+
+version: "0.1-draft"
+status: "PENDING CLINICIAN REVIEW"
+
+emergency:
+  status: "PENDING CLINICIAN REVIEW"
+  # Hardcoded emergency flags (plan: heavy bleeding, cannot swallow fluids, severe jaundice).
+  flags:
+    heavy_bleeding: "Heavy bleeding reported"
+    cannot_swallow_fluids: "Cannot swallow fluids"
+    severe_jaundice: "Severe jaundice reported"
+  action: "Go to the nearest emergency facility now. Do not wait for an appointment."
+  recommended:
+    test: "Immediate emergency assessment by a doctor"
+    timeframe: "Now"
+
+risk:
+  status: "PENDING CLINICIAN REVIEW"
+  levels:
+    medium_min_score: 2   # demo placeholder
+    high_min_score: 5     # demo placeholder
+  factors:
+    tobacco:              # points per answer; demo placeholders
+      none: 0
+      smokeless: 2
+      smoking: 2
+      both: 3
+    tobacco_years:
+      min_years: 10       # demo placeholder; only counts if tobacco is not "none"
+      points: 1
+    betel_quid: 2
+    alcohol:
+      none: 0
+      occasional: 0
+      regular: 1
+    family_history: 1
+    prior_oral_lesion: 2
+    age:
+      min_age: 45         # demo placeholder
+      points: 1
+
+symptoms:
+  status: "PENDING CLINICIAN REVIEW"
+  duration_days:
+    soon_min: 7           # demo placeholder
+    urgent_min: 21        # demo placeholder
+  red_flag_minimum_urgency: "soon"   # demo placeholder
+  red_flag_symptoms:
+    - non_healing_ulcer
+    - lump_or_swelling
+    - white_or_red_patch
+  labels:
+    non_healing_ulcer: "Mouth sore that is not healing"
+    white_or_red_patch: "White or red patch in the mouth"
+    lump_or_swelling: "Lump or swelling in the mouth or neck"
+    persistent_mouth_pain: "Persistent mouth pain"
+    difficulty_chewing_or_swallowing: "Difficulty chewing or swallowing"
+    unexplained_loose_tooth: "Loose tooth without a clear cause"
+
+recommended_tests:
+  status: "PENDING CLINICIAN REVIEW"
+  by_risk:
+    Low:
+      test: "Routine oral examination at the next health visit"
+      timeframe: "Within 3 months (demo placeholder)"
+    Medium:
+      test: "Oral examination by a doctor or trained health worker"
+      timeframe: "Within 1 month (demo placeholder)"
+    High:
+      test: "Oral examination by a doctor, with referral for further tests if advised"
+      timeframe: "Within 1 week (demo placeholder)"
+  by_urgency:
+    routine:
+      test: "Routine oral examination"
+      timeframe: "Within 1 month (demo placeholder)"
+    soon:
+      test: "Oral examination by a doctor"
+      timeframe: "Within 1 week (demo placeholder)"
+    urgent:
+      test: "Oral examination by a doctor as soon as possible"
+      timeframe: "Within 2 days (demo placeholder)"

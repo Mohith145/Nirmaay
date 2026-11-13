@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "Nirmay Member 2 API (provisional)",
+    "description": "Requests for Member 2 routers. They require mounting the routers in backend/main.py before use.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" }
+  ],
+  "item": [
+    {
+      "name": "Explain structured result",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"result\": {\n    \"risk_level\": \"Medium\",\n    \"reasons\": [\"Demo placeholder reason\"],\n    \"urgency\": \"soon\",\n    \"emergency\": false,\n    \"recommended_test\": \"Speak with a clinician\"\n  }\n}"
+        },
+        "url": "{{base_url}}/explain"
+      }
+    },
+    {
+      "name": "Curated FAQ",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/explain/faq/what-is-nirmay"
+      }
+    },
+    {
+      "name": "Model card status",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/model-card"
+      }
+    },
+    {
+      "name": "Text to speech fallback",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Screening aid, not diagnosis.\",\n  \"language\": \"en\"\n}"
+        },
+        "url": "{{base_url}}/voice/tts"
+      }
+    },
+    {
+      "name": "Speech to text fallback",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" },
+            { "key": "language", "value": "en", "type": "text" }
+          ]
+        },
+        "url": "{{base_url}}/voice/stt"
+      }
+    }
+  ]
+}
