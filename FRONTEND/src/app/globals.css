@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Tokens */
+  --brand-50: #F0FDFA;
+  --brand-100: #CCFBF1;
+  --brand-600: #0F766E;
+  --brand-700: #115E59;
+
+  /* Neutral / Ink Tokens */
+  --ink-900: #0F172A;
+  --ink-600: #475569;
+  --ink-400: #94A3B8;
+
+  /* Surface & Line Tokens */
+  --surface-0: #FFFFFF;
+  --surface-50: #F8FAFC;
+  --surface-100: #F1F5F9;
+  --line-200: #E2E8F0;
+
+  /* Risk & Semantic Tokens */
+  --risk-low: #16A34A;
+  --risk-low-bg: #F0FDF4;
+  --risk-med: #D97706;
+  --risk-med-bg: #FFFBEB;
+  --risk-high: #DC2626;
+  --risk-high-bg: #FEF2F2;
+
+  --emergency: #B91C1C;
+  --emergency-bg: #FEF2F2;
+
+  --demo: #7C3AED;
+  --demo-bg: #F5F3FF;
+
+  --info: #2563EB;
+  --info-bg: #EFF6FF;
+
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+  --font-devanagari: "Noto Sans Devanagari", sans-serif;
+  --font-kannada: "Noto Sans Kannada", sans-serif;
+}
+
+/* Accessibility: High Contrast Mode */
+.high-contrast {
+  --brand-50: #FFFFFF;
+  --brand-100: #D1FAE5;
+  --brand-600: #064E3B;
+  --brand-700: #022C22;
+  --ink-900: #000000;
+  --ink-600: #1F2937;
+  --ink-400: #4B5563;
+  --surface-0: #FFFFFF;
+  --surface-50: #F3F4F6;
+  --surface-100: #E5E7EB;
+  --line-200: #111827;
+  --risk-low: #047857;
+  --risk-low-bg: #ECFDF5;
+  --risk-med: #B45309;
+  --risk-med-bg: #FEF3C7;
+  --risk-high: #991B1B;
+  --risk-high-bg: #FEE2E2;
+  --emergency: #7F1D1D;
+  --emergency-bg: #FEE2E2;
+  --demo: #5B21B6;
+  --demo-bg: #EDE9FE;
+  --info: #1E40AF;
+  --info-bg: #DBEAFE;
+}
+
+/* Accessibility: Large Text Mode */
+.large-text {
+  font-size: 1.15rem;
+}
+
+.large-text h1 {
+  font-size: 2.25rem !important;
+  line-height: 2.75rem !important;
+}
+
+.large-text h2 {
+  font-size: 1.75rem !important;
+  line-height: 2.25rem !important;
+}
+
+.large-text h3 {
+  font-size: 1.4rem !important;
+  line-height: 1.85rem !important;
+}
+
+.large-text button,
+.large-text a,
+.large-text input,
+.large-text select,
+.large-text textarea {
+  font-size: 1.15rem !important;
+}
+
+/* Visible keyboard focus indicators */
+*:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+}
+
+/* Global body resets */
+body {
+  color: var(--ink-900);
+  background-color: var(--surface-50);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
