@@ -4,13 +4,21 @@ import { firebaseAuth } from "../firebase";
 const DEFAULT_TIMEOUT_MS = 30000;
 const PHOTO_TIMEOUT_MS = 60000;
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
-  (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "");
+const configuredApiBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
+const isLocalApiBase = /^https?:\/\/(localhost|127(?:\.\d{1,3}){3}|\[::1\])(?::\d+)?(?:\/|$)/i
+  .test(configuredApiBase);
+
+// A local .env value must not make a production deployment call the visitor's
+// own machine. In Vercel Services, production API traffic uses the same-origin
+// /api rewrite to the FastAPI service.
+export const API_BASE_URL = process.env.NODE_ENV === "production" && isLocalApiBase
+  ? ""
+  : configuredApiBase || (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "");
 
 // In a Vercel Services deployment, the browser and API share an origin. Route
 // API calls through the public /api rewrite unless an external API origin is set.
 export const API_PATH_PREFIX = process.env.NEXT_PUBLIC_API_PATH_PREFIX ??
-  (!process.env.NEXT_PUBLIC_API_BASE_URL && process.env.NODE_ENV === "production" ? "/api" : "");
+  (!API_BASE_URL && process.env.NODE_ENV === "production" ? "/api" : "");
 
 export function buildApiUrl(endpoint) {
   if (endpoint.startsWith("http")) return endpoint;
