@@ -42,6 +42,10 @@ INFER_TF = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
 ])
 
+# Abstain on low-scoring inputs instead of forcing a Cancer/Non_Cancer label.
+# This is a conservative demo cutoff, not a semantic mouth-image detector.
+DEFAULT_MIN_DETECTION_SCORE = 0.70
+
 # Cancer type display info
 CANCER_TYPE_INFO = {
     "SCC":                     "Squamous Cell Carcinoma — most common (>90% of oral cancers)",
@@ -91,7 +95,14 @@ def load_stage2_model(device):
 # INFERENCE
 # ─────────────────────────────────────────────────────────────────────────────
 
-def predict_image(stage1_model, stage2_model, image_path: str, device, stage2_classes: list = None) -> dict:
+def predict_image(
+    stage1_model,
+    stage2_model,
+    image_path: str,
+    device,
+    stage2_classes: list = None,
+    min_detection_score: float = DEFAULT_MIN_DETECTION_SCORE,
+) -> dict:
     """
     Full 2-stage inference on a single image.
     Returns a dict with detection + type classification results.
@@ -111,8 +122,11 @@ def predict_image(stage1_model, stage2_model, image_path: str, device, stage2_cl
     cancer_prob     = float(probs1[0])   # index 0 = Cancer
     noncancer_prob  = float(probs1[1])   # index 1 = Non_Cancer
     is_cancer       = cancer_prob > noncancer_prob
-    stage1_label    = "Cancer" if is_cancer else "Non_Cancer"
     stage1_conf     = cancer_prob if is_cancer else noncancer_prob
+    stage1_label    = "Cancer" if is_cancer else "Non_Cancer"
+    if stage1_conf < min_detection_score:
+        stage1_label = "Not_Sure"
+        is_cancer = False
 
     result = {
         "image":            os.path.basename(image_path),
@@ -155,7 +169,7 @@ def predict_image(stage1_model, stage2_model, image_path: str, device, stage2_cl
 
 def print_result(result: dict):
     """Pretty-print a single prediction result."""
-    icon = "🔴" if result["detection"] == "Cancer" else "🟢"
+    icon = {"Cancer": "🔴", "Non_Cancer": "🟢", "Not_Sure": "⚠️"}.get(result["detection"], "⚠️")
     print(f"\n{'='*60}")
     print(f"🔬 NIRMAY — AI Oral Cancer Diagnostic Report")
     print(f"{'='*60}")
@@ -163,14 +177,24 @@ def print_result(result: dict):
     print(f"  Detection        : {icon} {result['detection']} ({result['detection_conf']})")
     print(f"  Cancer Prob      : {result['cancer_prob']}")
     print(f"  Non-Cancer Prob  : {result['non_cancer_prob']}")
-    if result["cancer_type"] != "N/A":
+    if result["detection"] == "Not_Sure":
+        print("  Result           : No class assigned; score below the minimum threshold.")
+        print("  Next step        : Check that the image is a clear inside-mouth photo; consult a clinician if concerned.")
+    elif result["cancer_type"] != "N/A":
         print(f"\n  🧬 Cancer Type   : {result['cancer_type']} ({result['type_confidence']})")
         print(f"  Description      : {result['type_description']}")
         print(f"  Top 3 Types      : {result['top3_types']}")
     print(f"{'='*60}\n")
 
 
-def predict_folder(stage1_model, stage2_model, folder: str, device, output_csv=None):
+def predict_folder(
+    stage1_model,
+    stage2_model,
+    folder: str,
+    device,
+    output_csv=None,
+    min_detection_score: float = DEFAULT_MIN_DETECTION_SCORE,
+):
     """Batch inference on all images in a folder."""
     folder_path = Path(folder)
     images = [f for f in folder_path.rglob("*") if f.suffix.lower() in IMG_EXTENSIONS]
@@ -184,9 +208,15 @@ def predict_folder(stage1_model, stage2_model, folder: str, device, output_csv=N
 
     for img_path in images:
         try:
-            r = predict_image(stage1_model, stage2_model, str(img_path), device)
+            r = predict_image(
+                stage1_model,
+                stage2_model,
+                str(img_path),
+                device,
+                min_detection_score=min_detection_score,
+            )
             results.append(r)
-            icon = "🔴" if r["detection"] == "Cancer" else "🟢"
+            icon = {"Cancer": "🔴", "Non_Cancer": "🟢", "Not_Sure": "⚠️"}.get(r["detection"], "⚠️")
             type_str = f" → {r['cancer_type']}" if r["cancer_type"] != "N/A" else ""
             print(f"  {icon} {img_path.name:<40} {r['detection']}{type_str} ({r['detection_conf']})")
         except Exception as e:
@@ -195,10 +225,12 @@ def predict_folder(stage1_model, stage2_model, folder: str, device, output_csv=N
     # Summary
     cancer_results     = [r for r in results if r["detection"] == "Cancer"]
     non_cancer_results = [r for r in results if r["detection"] == "Non_Cancer"]
+    not_sure_results   = [r for r in results if r["detection"] == "Not_Sure"]
     print(f"\n{'='*60}")
     print(f"📊 Summary: {len(results)} images")
     print(f"   🔴 Cancer     : {len(cancer_results)}")
     print(f"   🟢 Non-Cancer : {len(non_cancer_results)}")
+    print(f"   ⚠️  Not Sure   : {len(not_sure_results)}")
     if cancer_results and cancer_results[0]["cancer_type"] != "N/A":
         from collections import Counter
         type_counts = Counter(r["cancer_type"] for r in cancer_results)
@@ -228,17 +260,40 @@ def main():
     group.add_argument("--image",  type=str, help="Path to a single image")
     group.add_argument("--folder", type=str, help="Path to a folder of images")
     parser.add_argument("--output", type=str, default=None, help="CSV output path (folder mode)")
+    parser.add_argument(
+        "--min-confidence",
+        type=float,
+        default=DEFAULT_MIN_DETECTION_SCORE,
+        help="Abstain below this raw model score (default: 0.70; not calibrated)",
+    )
     args   = parser.parse_args()
+
+    if not 0.0 <= args.min_confidence <= 1.0:
+        parser.error("--min-confidence must be between 0 and 1")
 
     device       = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     stage1_model = load_stage1_model(device)
     stage2_model, stage2_classes = load_stage2_model(device)
 
     if args.image:
-        result = predict_image(stage1_model, stage2_model, args.image, device, stage2_classes=stage2_classes)
+        result = predict_image(
+            stage1_model,
+            stage2_model,
+            args.image,
+            device,
+            stage2_classes=stage2_classes,
+            min_detection_score=args.min_confidence,
+        )
         print_result(result)
     else:
-        predict_folder(stage1_model, stage2_model, args.folder, device, output_csv=args.output)
+        predict_folder(
+            stage1_model,
+            stage2_model,
+            args.folder,
+            device,
+            output_csv=args.output,
+            min_detection_score=args.min_confidence,
+        )
 
 
 if __name__ == "__main__":
