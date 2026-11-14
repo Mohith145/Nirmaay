@@ -59,6 +59,19 @@ app = FastAPI(
     description=f"{DISCLAIMER} All thresholds are PENDING CLINICIAN REVIEW.",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def strip_vercel_api_prefix(request, call_next):
+    """Keep the public /api namespace separate from frontend routes on Vercel."""
+    path = request.scope.get("path", "")
+    if path == "/api" or path.startswith("/api/"):
+        stripped_path = path[4:] or "/"
+        request.scope["path"] = stripped_path
+        request.scope["raw_path"] = stripped_path.encode("utf-8")
+    return await call_next(request)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().cors_origin_list,

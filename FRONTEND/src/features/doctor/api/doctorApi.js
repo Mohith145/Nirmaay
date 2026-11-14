@@ -8,6 +8,7 @@
  */
 import { getClinicianQueue, getClinicianCase, reviewCase } from "@/lib/api/clinician";
 import { createAppointment, getAppointment } from "@/lib/api/appointments";
+import { buildApiUrl } from "@/lib/api/client";
 
 export const doctorApi = {
   // Clinician queue (actual backend endpoint)
@@ -80,7 +81,7 @@ export const doctorApi = {
           id: raw.photo.photo_id,
           url: raw.photo.image_url.startsWith("http") 
             ? raw.photo.image_url 
-            : `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"}${raw.photo.image_url}`,
+            : buildApiUrl(raw.photo.image_url),
           label: "Oral Cavity Photo",
           heatmap: raw.photo.heatmap_base64,
         }

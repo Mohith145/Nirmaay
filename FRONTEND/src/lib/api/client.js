@@ -7,6 +7,20 @@ const PHOTO_TIMEOUT_MS = 60000;
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
   (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "");
 
+// In a Vercel Services deployment, the browser and API share an origin. Route
+// API calls through the public /api rewrite unless an external API origin is set.
+export const API_PATH_PREFIX = process.env.NEXT_PUBLIC_API_PATH_PREFIX ??
+  (!process.env.NEXT_PUBLIC_API_BASE_URL && process.env.NODE_ENV === "production" ? "/api" : "");
+
+export function buildApiUrl(endpoint) {
+  if (endpoint.startsWith("http")) return endpoint;
+
+  const path = `${API_PATH_PREFIX}/${endpoint.replace(/^\/+/, "")}`;
+  return API_BASE_URL
+    ? `${API_BASE_URL.replace(/\/$/, "")}${path}`
+    : path;
+}
+
 /**
  * Core HTTP client for the Nirmay platform.
  * Centralizes authentication, timeouts, error normalization, and response parsing.
@@ -24,16 +38,14 @@ export async function apiFetch(endpoint, options = {}) {
   } = options;
 
   // Resolve base URL and path
-  if (!endpoint.startsWith("http") && !API_BASE_URL) {
+  if (!endpoint.startsWith("http") && !API_BASE_URL && !API_PATH_PREFIX) {
     throw new ApiError(
-      "The API is not configured. Set NEXT_PUBLIC_API_BASE_URL to the deployed backend URL and rebuild the frontend.",
+      "The API is not configured. Set NEXT_PUBLIC_API_BASE_URL or deploy the backend with the frontend.",
       503,
       "api_not_configured"
     );
   }
-  const url = endpoint.startsWith("http")
-    ? endpoint
-    : `${API_BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+  const url = buildApiUrl(endpoint);
 
   // Resolve authorization token
   let authToken = token;

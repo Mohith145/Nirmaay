@@ -1,15 +1,17 @@
-# Deploy Nirmaay with Vercel and Firebase
+# Deploy Nirmaay as one Vercel Services project with Firebase
 
-This repository is a monorepo with a Next.js frontend and a FastAPI API. Deploy them as
-two Vercel projects so each has the correct runtime and environment variables.
+The repository root `vercel.json` groups the Next.js frontend and FastAPI backend into
+one Vercel Services project. Vercel builds them independently and serves the frontend
+at `/` and the API through the same domain under `/api`. Firebase provides Auth,
+Firestore, and Storage; PostgreSQL remains the backend's relational database.
 
 ## Services
 
-- Vercel hosts the Next.js frontend and the FastAPI serverless API.
+- Vercel Services hosts the Next.js frontend and FastAPI API in one project/deployment.
 - Firebase Authentication handles web sign-in; the API verifies Firebase ID tokens.
 - PostgreSQL remains the primary relational database because the existing API uses
   SQLAlchemy. Use a durable Postgres provider from Vercel Marketplace and set its
-  `DATABASE_URL` in the backend project.
+  `DATABASE_URL` for the backend service.
 - Firestore receives committed application-record mirrors through a SQL outbox.
 - Firebase Storage stores retained screening photos privately. Photos are not written
   to Firestore documents or public URLs.
@@ -18,15 +20,25 @@ Firestore mirroring is asynchronous and does not replace the relational source o
 Existing SQL rows are not automatically backfilled by a new deployment; do not delete
 the existing database until an explicit migration and record-count reconciliation is done.
 
-## 1. Deploy the backend API
+## 1. Create the Vercel project
 
-In Vercel, create a project from `Mohith145/Nirmaay` and set **Root Directory** to
-`Backend` (leave “Include files outside the root directory” enabled only if a future
-backend import actually needs them). The Python entrypoint is `app/main.py`; the project
-includes `vercel.json` and `.python-version` for Vercel's Python runtime in Mumbai.
+Import `Mohith145/Nirmaay` from the repository root. Set the project's framework to
+**Services** in Vercel's Build and Deployment settings; do not set a service-specific
+Root Directory on the project. The root `vercel.json` defines `frontend` (`FRONTEND`)
+and `backend` (`Backend`) services. The frontend is public at `/`; `/api` and `/api/*`
+are routed to FastAPI, whose middleware removes that prefix before matching its existing
+routes. No service binding is needed: the browser calls the backend through this public
+same-origin `/api` route, and the backend does not call another Vercel service.
 
-Attach a durable PostgreSQL database through Vercel Marketplace. Configure these backend
-environment variables for Production and Preview as appropriate:
+The `NIRMAY` directory contains model training scripts and PyTorch checkpoints, not an
+HTTP app, so it is kept in the repository but is not configured as a third runtime
+service. The backend's ONNX inference artifact must be available at
+`Backend/app/services/vision/model.onnx` with matching `model_metadata.json` for image
+classification to run. Model training checkpoints are not automatically converted or
+included in the backend deployment.
+
+Attach a durable PostgreSQL database through Vercel Marketplace. Scope the following
+environment variables to the **backend** service in Production and Preview as appropriate:
 
 | Variable | Value |
 | --- | --- |
@@ -46,16 +58,12 @@ Deploy the restrictive Firestore and Storage client rules from the repository ro
 the Firebase CLI (`firebase deploy --only firestore:rules,storage`). The app's backend
 uses the Admin SDK, which bypasses these client rules.
 
-Deploy and open `https://<backend-domain>/health`. It should return a JSON status.
+Deploy and open `https://<project-domain>/api/health`. It should return a JSON status.
 
-## 2. Configure the frontend project
-
-Use the existing Next.js Vercel project and set its **Root Directory** to `FRONTEND`.
-Set the following public web configuration in its Vercel environment variables:
+Scope the following public web configuration variables to the **frontend** service:
 
 | Variable | Value |
 | --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | Backend deployment origin, e.g. `https://nirmaay-api.vercel.app` |
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Web App config value |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Web App config value |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | `nirmaay-9e3b0` |
@@ -64,11 +72,15 @@ Set the following public web configuration in its Vercel environment variables:
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase Web App config value |
 | `NEXT_PUBLIC_JAAS_APP_ID` | Existing JaaS App ID, if video calls are enabled |
 
-Firebase web config is public client configuration. Do not add service-account JSON or
-private keys to any `NEXT_PUBLIC_*` variable. Redeploy the frontend after changing env
-variables; Next.js values are embedded at build time.
+For the single-project setup, leave `NEXT_PUBLIC_API_BASE_URL` unset so the browser
+uses `/api` on the shared Vercel domain. Set it only when intentionally using a separate
+backend origin. Redeploy after changing frontend variables; Next.js values are embedded
+at build time.
 
-## 3. Confirm access and data behavior
+Firebase web config is public client configuration. Do not add service-account JSON or
+private keys to any `NEXT_PUBLIC_*` variable.
+
+## 2. Confirm access and data behavior
 
 - Add the frontend's production and preview origins to backend `CORS_ORIGINS` exactly.
 - Visit the public homepage, register a patient, sign in, and confirm `/me` succeeds.
