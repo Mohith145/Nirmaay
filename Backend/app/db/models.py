@@ -24,6 +24,16 @@ class User(Base):
     firebase_uid: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True, index=True)
 
 
+class PatientProfile(Base):
+    """Optional registration details collected during assisted camp intake."""
+    __tablename__ = "patient_profiles"
+    patient_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    age: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    camp_token: Mapped[str | None] = mapped_column(String(80), unique=True, index=True, nullable=True)
+
+
 class Consent(Base):
     __tablename__ = "consents"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -122,6 +132,7 @@ class Appointment(Base):
     doctor_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     patient_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     room_id: Mapped[str] = mapped_column(String(64), unique=True)
+    status: Mapped[str] = mapped_column(String(12), default="scheduled")  # scheduled | live | ended
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 

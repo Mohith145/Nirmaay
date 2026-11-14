@@ -14,6 +14,7 @@ from app.api import (
     demo,
     intake,
     me,
+    patients,
     photos,
     quit,
     symptoms,
@@ -81,7 +82,7 @@ app.add_middleware(
 )
 install_error_handlers(app)
 
-for r in (auth, consent, intake, symptoms, photos, cases, clinician, appointments, quit, demo, me):
+for r in (auth, consent, intake, symptoms, photos, cases, clinician, appointments, quit, demo, me, patients):
     app.include_router(r.router)
 
 for name in OPTIONAL_ROUTERS:
