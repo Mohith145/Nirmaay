@@ -37,6 +37,11 @@ curl http://localhost:8000/health
 
 The database is SQLite by default. Set `DATABASE_URL` in `.env` to switch to Postgres.
 
+## Vercel and Firebase deployment
+
+For the monorepo deployment steps, required environment variables, private image storage,
+and Firestore data behavior, see [`VERCEL_FIREBASE_DEPLOY.md`](VERCEL_FIREBASE_DEPLOY.md).
+
 ## Seed and reset demo data
 
 ```bash

@@ -4,8 +4,8 @@ import { firebaseAuth } from "../firebase";
 const DEFAULT_TIMEOUT_MS = 30000;
 const PHOTO_TIMEOUT_MS = 60000;
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "");
 
 /**
  * Core HTTP client for the Nirmay platform.
@@ -24,6 +24,13 @@ export async function apiFetch(endpoint, options = {}) {
   } = options;
 
   // Resolve base URL and path
+  if (!endpoint.startsWith("http") && !API_BASE_URL) {
+    throw new ApiError(
+      "The API is not configured. Set NEXT_PUBLIC_API_BASE_URL to the deployed backend URL and rebuild the frontend.",
+      503,
+      "api_not_configured"
+    );
+  }
   const url = endpoint.startsWith("http")
     ? endpoint
     : `${API_BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;

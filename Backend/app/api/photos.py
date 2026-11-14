@@ -16,7 +16,7 @@ from concurrent.futures import TimeoutError as FutureTimeout
 from importlib import import_module
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy.orm import Session
 
@@ -170,12 +170,24 @@ def screen_photo(
     )
     # 3. Retention: keep the image only when it is being sent to a doctor, else it is never stored.
     if send_to_doctor:
-        directory = get_settings().upload_dir
-        os.makedirs(directory, exist_ok=True)
-        path = os.path.join(directory, uuid.uuid4().hex + ".jpg")  # random filename
-        with open(path, "wb") as f:
-            f.write(clean)
-        row.image_path, row.retained = path, True
+        image_key = f"retained-screenings/{uuid.uuid4().hex}.jpg"
+        if os.environ.get("VERCEL") == "1":
+            try:
+                from app.core.firebase import firebase_storage_bucket
+
+                blob = firebase_storage_bucket().blob(image_key)
+                blob.upload_from_string(clean, content_type="image/jpeg")
+                row.image_path, row.retained = f"firebase://{image_key}", True
+            except Exception:
+                db.rollback()
+                raise http_error(503, "image_storage_unavailable", "Secure image storage is unavailable. Please retry.") from None
+        else:
+            directory = get_settings().upload_dir
+            os.makedirs(directory, exist_ok=True)
+            path = os.path.join(directory, image_key.rsplit("/", 1)[-1])
+            with open(path, "wb") as f:
+                f.write(clean)
+            row.image_path, row.retained = path, True
     audit(db, actor, "photo.screen", "photo", row.id, {"subject_id": subject.id, "status": status})
     db.commit()
     return PhotoOut(
@@ -199,8 +211,19 @@ def get_photo_image(
     doctor: User = Depends(require_role(Role.doctor)),
 ):
     row = db.get(PhotoScreening, photo_id)
-    if row is None or not row.retained or not row.image_path or not os.path.exists(row.image_path):
+    if row is None or not row.retained or not row.image_path:
         raise http_error(404, "photo_not_available", "No stored photo for this id.")
     audit(db, doctor, "photo.view", "photo", row.id, {"subject_id": row.subject_id})
     db.commit()
-    return FileResponse(row.image_path, media_type="image/jpeg")
+    if row.image_path.startswith("firebase://"):
+        try:
+            from app.core.firebase import firebase_storage_bucket
+
+            key = row.image_path.removeprefix("firebase://")
+            data = firebase_storage_bucket().blob(key).download_as_bytes()
+        except Exception:
+            raise http_error(404, "photo_not_available", "No stored photo for this id.") from None
+        return Response(data, media_type="image/jpeg", headers={"Cache-Control": "private, no-store"})
+    if not os.path.exists(row.image_path):
+        raise http_error(404, "photo_not_available", "No stored photo for this id.")
+    return FileResponse(row.image_path, media_type="image/jpeg", headers={"Cache-Control": "private, no-store"})

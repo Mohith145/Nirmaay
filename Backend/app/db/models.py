@@ -21,6 +21,7 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     deletion_requested_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    firebase_uid: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True, index=True)
 
 
 class Consent(Base):
@@ -143,3 +144,15 @@ class QuitProgress(Base):
     quit_date: Mapped[date] = mapped_column(Date)
     daily_spend: Mapped[float] = mapped_column(Float, default=0.0)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class FirestoreOutbox(Base):
+    """Durable queue for mirroring committed application records to Firestore."""
+    __tablename__ = "firestore_outbox"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    collection: Mapped[str] = mapped_column(String(80), index=True)
+    document_id: Mapped[str] = mapped_column(String(128))
+    payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    is_delete: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    delivered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

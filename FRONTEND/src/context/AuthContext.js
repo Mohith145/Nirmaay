@@ -11,7 +11,11 @@ import {
 } from "firebase/auth";
 import { firebaseAuth } from "../lib/firebase";
 import { apiFetch } from "../lib/api/client";
-import { register as apiRegister, deleteAccount as apiDeleteAccount } from "../lib/api/auth";
+import {
+  login as legacyLogin,
+  register as apiRegister,
+  deleteAccount as apiDeleteAccount,
+} from "../lib/api/auth";
 import { ROLE_HOME_ROUTES } from "../config/roles";
 
 const AuthContext = createContext(null);
@@ -92,9 +96,19 @@ export function AuthProvider({ children }) {
   const login = useCallback(async ({ email, password, redirectTo = null }) => {
     setIsLoading(true);
     try {
-      const credential = await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
-      const idToken = await credential.user.getIdToken(true);
-      const profile = await backendUser(idToken);
+      let idToken;
+      let profile;
+      try {
+        const credential = await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+        idToken = await credential.user.getIdToken(true);
+        profile = await backendUser(idToken);
+      } catch {
+        // Existing SQL accounts and seeded demo accounts may not have Firebase Auth users yet.
+        if (firebaseAuth.currentUser) await signOut(firebaseAuth);
+        const legacySession = await legacyLogin({ email: email.trim(), password });
+        idToken = legacySession.access_token;
+        profile = await backendUser(idToken);
+      }
       const userInfo = {
         id: profile.id,
         email: profile.email,

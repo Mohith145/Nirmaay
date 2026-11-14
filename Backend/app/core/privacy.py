@@ -42,6 +42,14 @@ def withdraw_subject(db: Session, subject: User, *, deactivate: bool = False) ->
 def _remove_file(path: str | None) -> None:
     if path:
         try:
+            if path.startswith("firebase://"):
+                from app.core.firebase import firebase_storage_bucket
+
+                firebase_storage_bucket().blob(path.removeprefix("firebase://")).delete()
+                return
             os.remove(path)
         except FileNotFoundError:
+            pass
+        except Exception:
+            # Keep withdrawal flow available if remote media deletion is temporarily unavailable.
             pass

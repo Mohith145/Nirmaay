@@ -26,6 +26,11 @@ class LoginIn(BaseModel):
     password: str = Field(max_length=72)
 
 
+class FirebaseProfileIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    full_name: str = Field(min_length=1, max_length=120)
+
+
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int

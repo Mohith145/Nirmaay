@@ -6,8 +6,14 @@ from app.core.privacy import withdraw_subject
 from app.core.security import get_current_user
 from app.db.models import User
 from app.db.session import get_db
+from app.schemas.auth import UserOut
 
 router = APIRouter(tags=["me"])
+
+
+@router.get("/me", response_model=UserOut)
+def get_me(user: User = Depends(get_current_user)):
+    return user
 
 
 @router.delete("/me")

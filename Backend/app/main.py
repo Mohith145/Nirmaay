@@ -32,6 +32,16 @@ OPTIONAL_ROUTERS = ("explain", "voice", "whatsapp", "model_card")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    from app.db.firestore_sync import install_firestore_sync
+
+    install_firestore_sync()
+    if get_settings().firebase_project_id:
+        try:
+            from app.db.firestore_sync import drain_firestore_outbox
+
+            drain_firestore_outbox()
+        except Exception as e:
+            log.warning("Firestore outbox retry deferred: %s", type(e).__name__)
     # Load the model once at startup (never inside a request) if Member 2 exposes a loader.
     try:
         classifier = import_module("app.services.vision.classifier")

@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Private clinical images are proxied through the role-protected API.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
