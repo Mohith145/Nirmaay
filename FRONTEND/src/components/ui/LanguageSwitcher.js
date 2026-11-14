@@ -36,7 +36,7 @@ export function LanguageSwitcher({ showAccessibility = true, className = "" }) {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        aria-label="Select language"
+        aria-label={`Select language: ${currentLang.native}`}
         className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg border border-line-200 bg-surface-0 hover:bg-surface-50 text-ink-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 min-h-touch"
       >
         <Globe className="w-4 h-4 text-brand-600" />
