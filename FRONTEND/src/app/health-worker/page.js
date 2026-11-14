@@ -39,10 +39,6 @@ export default function HealthWorkerHomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingPatients, setIsLoadingPatients] = useState(true);
 
-  useEffect(() => {
-    loadPatientsList("");
-  }, []);
-
   const loadPatientsList = async (query = "") => {
     setIsLoadingPatients(true);
     try {
@@ -55,6 +51,10 @@ export default function HealthWorkerHomePage() {
       setIsLoadingPatients(false);
     }
   };
+
+  useEffect(() => {
+    loadPatientsList("");
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

@@ -47,6 +47,10 @@ function calendarMonthDays(month) {
   return [...Array(firstWeekday).fill(null), ...Array.from({ length: dayCount }, (_, index) => new Date(year, monthIndex, index + 1))];
 }
 
+function FieldError({ errors, field }) {
+  return errors[field] ? <p id={`${field}-err`} className="mt-1 text-sm text-red-700">{errors[field]}</p> : null;
+}
+
 /**
  * DOCTOR-ONLY. Creating an appointment is what creates the consultation (and
  * its Consultation ID). Patients have no equivalent screen anywhere.
@@ -161,7 +165,6 @@ function Body() {
   if (patients.loading) return <LoadingState />;
   if (patients.error) return <ErrorState message={errorMessage(patients.error)} onRetry={patients.reload} />;
 
-  const E = ({ k }) => (errors[k] ? <p id={`${k}-err`} className="mt-1 text-sm text-red-700">{errors[k]}</p> : null);
   const d = (k) => (errors[k] ? `${k}-err` : undefined);
 
   return (
@@ -185,7 +188,7 @@ function Body() {
             <option value="">{t("doctor.decision.choose", "Select...")}</option>
             {list.map((p) => <option key={p.id} value={p.id}>{p.name || p.id}</option>)}
           </select>
-          <E k="patientId" />
+          <FieldError errors={errors} field="patientId" />
         </div>
         <div className="grid gap-6 lg:grid-cols-[minmax(300px,0.85fr)_minmax(0,1.15fr)]">
           <section aria-labelledby="date-heading" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -222,7 +225,7 @@ function Body() {
                 </button>;
               })}
             </div>
-            <E k="date" />
+            <FieldError errors={errors} field="date" />
           </section>
 
           <section className="space-y-5">
@@ -250,7 +253,7 @@ function Body() {
                   </button>;
                 })}
               </div>}
-              <E k="time" />
+              <FieldError errors={errors} field="time" />
             </div>
           </section>
         </div>

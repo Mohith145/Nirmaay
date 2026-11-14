@@ -33,7 +33,10 @@ function loadJitsiScript(appId) {
 export default function JitsiStage({ roomName, displayName, subject, token, apiRef, handlers }) {
   const parentRef = useRef(null);
   const handlersRef = useRef(handlers);
-  handlersRef.current = handlers;
+
+  useEffect(() => {
+    handlersRef.current = handlers;
+  }, [handlers]);
 
   useEffect(() => {
     let disposed = false;

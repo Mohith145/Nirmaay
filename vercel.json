@@ -5,7 +5,6 @@
       "root": "Backend",
       "framework": "fastapi",
       "entrypoint": "app.main:app",
-      "regions": ["bom1"],
       "functions": {
         "app/main.py": {
           "maxDuration": 60
