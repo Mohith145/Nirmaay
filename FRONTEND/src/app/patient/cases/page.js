@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FolderOpen, ArrowRight, ShieldCheck, HeartPulse } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -16,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function PatientCasesPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [cases, setCases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,7 +67,7 @@ export default function PatientCasesPage() {
               title="No Screening Results Available Yet"
               description="No screening results available yet. Your health worker will conduct your screening and your results will appear here once submitted."
               actionLabel="Return to Dashboard"
-              onAction={() => (window.location.href = "/patient")}
+              onAction={() => router.push("/patient")}
               icon={<FolderOpen className="w-8 h-8 text-teal-600" />}
             />
           </Card.Content>

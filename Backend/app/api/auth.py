@@ -16,8 +16,8 @@ from app.core.firebase import (
 )
 from app.core.roles import Role
 from app.core.security import (
-    create_access_token,
     bearer,
+    create_access_token,
     get_optional_user,
     hash_password,
     verify_password,

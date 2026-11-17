@@ -101,7 +101,8 @@ export async function apiFetch(endpoint, options = {}) {
         if (firebaseAuth.currentUser) await firebaseAuth.signOut();
         if (!window.location.pathname.startsWith("/login")) {
           const currentPath = window.location.pathname;
-          window.location.href = `/login?next=${encodeURIComponent(currentPath)}`;
+          window.history.pushState({}, "", `/login?next=${encodeURIComponent(currentPath)}`);
+          window.dispatchEvent(new PopStateEvent("popstate"));
         }
       }
     }
